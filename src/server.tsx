@@ -10,6 +10,7 @@ import {
   CookieStore 
 } from 'hono-sessions'
 
+
 export class App {
   private _app: Hono;
   constructor(controllers: IController[]) {
@@ -26,6 +27,7 @@ export class App {
   private async initMiddleware() {
     this._app.use("*", logger(), prettyJSON());
     this._app.use("/static/*", serveStatic({ root: "./" }));
+    const store = new CookieStore()
     this._app.use('*', sessionMiddleware({
       store,
       encryptionKey: 'password_at_least_32_characters_long', // Required for CookieStore, recommended for others

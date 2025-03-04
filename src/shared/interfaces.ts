@@ -16,3 +16,5 @@ export interface IPostsService {
   deletePost(postId: PostDelete): Promise<void>;
   getPosts(): Promise<IPost[]>;
 }
+
+//console.log("Hello World")

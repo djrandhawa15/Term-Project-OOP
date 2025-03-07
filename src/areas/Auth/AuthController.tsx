@@ -86,6 +86,7 @@ export class AuthController extends BaseController implements IController {
       const foundUser = await this._authService.loginUser(validatedUser);
       const sessionId = randomUUID(); // Generate unique session ID
       _sessionStore.set(sessionId, foundUser.email);
+      
       setCookie(c, "session", sessionId, {
         httpOnly: true,
         secure: process.env.NODE_ENV === "production",

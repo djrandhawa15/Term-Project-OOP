@@ -28,6 +28,8 @@ export class App {
     this._app.use("*", logger(), prettyJSON());
     this._app.use("/static/*", serveStatic({ root: "./" }));
     const store = new CookieStore()
+    //for production maybe
+    // const store = new redisStore({
     this._app.use('*', sessionMiddleware({
       store,
       encryptionKey: 'password_at_least_32_characters_long', // Required for CookieStore, recommended for others

@@ -1,6 +1,8 @@
 import { db } from "../../../database/fakeDB";
 import { IUser } from "../../../shared/dtos";
 import { IAuthService } from "../../../shared/interfaces";
+import bcrypt from "bcrypt";
+
 
 export class MockAuthService implements IAuthService {
 
@@ -22,9 +24,15 @@ export class MockAuthService implements IAuthService {
     email: string,
     password: string
   ): Promise<IUser | undefined> {
-    return db.find(
-      (user) => user.email === email && user.password === password
-    );
+    for(const user of db) {
+      if(user.email === email) {
+        const isMatch = await bcrypt.compare(password, user.password);
+        if(isMatch) {
+          return user;
+        }
+      }
+    }
+    return undefined;
   }
   async createUser(user: IUser): Promise<IUser> {
     try {
@@ -32,7 +40,9 @@ export class MockAuthService implements IAuthService {
       throw new Error(`User with email ${user.email} already exists`);
     } catch (error) {
       if (error instanceof Error && error.message === "Invalid Login Credentials") {
-      const newUser = { id: Date.now(), posts: [], ...user };
+        const saltRounds = 10;
+        const hashedPassword = await bcrypt.hash(user.password, saltRounds);
+        const newUser = { id: Date.now(), posts: [], ...user, password: hashedPassword };
       db.push(newUser);
       return newUser
    } throw error;

@@ -28,7 +28,7 @@ export const Layout = ({
   return (
     <html>
       <Head />
-      <body>{children}</body>
+      <body className="min-h-screen">{children}</body>
       <script>hljs.highlightAll();</script>
     </html>
   );

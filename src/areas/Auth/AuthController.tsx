@@ -50,7 +50,7 @@ export class AuthController extends BaseController implements IController {
    *********************
    */
   private showRegisterPage = this.factory.createHandlers((c) =>
-    c.html(
+    c.render(
       <Layout>
         <Register />
       </Layout>
@@ -60,11 +60,26 @@ export class AuthController extends BaseController implements IController {
   private registerUser = this.factory.createHandlers(
     validate("form", UserDTO),
     async (c) => {
+      try {
       const validatedUser = c.req.valid("form");
-      const createdUser = await this._authService.createUser(validatedUser);
-      if (!createdUser) return c.redirect("/auth/register");
-      return c.redirect("/auth/login");
-    }
+      const createdUser = await this._authService.createUser(validatedUser)
+      const sessionId = randomUUID(); 
+      _sessionStore.set(sessionId, createdUser.email);
+      setCookie(c, "session", sessionId, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production",
+        maxAge: 30 * 60, // 30min
+        path: "/",
+      });
+      return c.redirect("/");
+
+  } catch (error) {
+    return c.render(  <Layout>
+    <Register error={(error as Error).message}/>
+    </Layout>
+);
+  }
+}
   );
   /*
    *********************
@@ -82,6 +97,7 @@ export class AuthController extends BaseController implements IController {
   private loginUser = this.factory.createHandlers(
     validate("form", UserDTO),
     async (c) => {
+      try {
       const validatedUser = c.req.valid("form");
       const foundUser = await this._authService.loginUser(validatedUser);
       const sessionId = randomUUID(); // Generate unique session ID
@@ -93,7 +109,14 @@ export class AuthController extends BaseController implements IController {
         path: "/",
       });
       return c.redirect("/");
+    } catch (error) {
+      return c.render(
+        <Layout>
+          <Login error={(error as Error).message} />
+        </Layout>
+    );
     }
+  }
   );
 
   private logoutUser = this.factory.createHandlers(async (c) => {

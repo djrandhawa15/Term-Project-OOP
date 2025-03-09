@@ -24,6 +24,7 @@ export function Login() {
                   type="email"
                   id="email"
                   name="email"
+                  required
                   placeholder="your@email.com"
                   class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 mt-1 leading-tight focus:outline-none focus:shadow-outline"
                 />

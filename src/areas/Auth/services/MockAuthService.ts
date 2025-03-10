@@ -33,6 +33,7 @@ export class MockAuthService implements IAuthService {
       }
     }
     return undefined;
+
   }
   async createUser(user: IUser): Promise<IUser> {
     try {
@@ -46,6 +47,7 @@ export class MockAuthService implements IAuthService {
       db.push(newUser);
       return newUser
    } throw error;
+
   }
 }
 

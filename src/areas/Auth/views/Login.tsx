@@ -1,4 +1,4 @@
-export function Login() {
+export function Login({ error }: { error?: string}) {
   return (
     <div class="bg-white font-family-karla h-screen">
       <div class="w-full flex flex-wrap">
@@ -11,11 +11,17 @@ export function Login() {
 
           <div class="flex flex-col justify-center md:justify-start my-auto pt-8 md:pt-0 px-8 md:px-24 lg:px-32">
             <p class="text-center text-3xl">Welcome back.</p>
+
             <form
               class="flex flex-col pt-3 md:pt-8"
               method="post"
               action="/auth/login"
             >
+
+{error && (
+  <p class="text-red-700 pt-4 mb-2 text-center" role="alert">{error}</p>
+            )}
+            
               <div class="flex flex-col pt-4">
                 <label for="email" class="text-lg">
                   Email

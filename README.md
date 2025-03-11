@@ -18,20 +18,20 @@ I also needed to research on Youtube and Google the following things:
 Dilraj Randhawa:
 I worked on the following tasks:
 
-1. <Insert Some Task Here> - This task is responsible for xyz functionality.
-2. <Insert Some Task Here> - This task is responsible for xyz functionality.
-3. <Insert Some Task Here> - This task is responsible for xyz functionality.
+1. Integrated Redis for Session Storage in Production – This task involved replacing the in-memory session store with Redis using hono-sessions-redis and ioredis. This change ensures persistent session storage across multiple instances of the application.
+2. Updated Middleware for Redis-based Authentication – Modified the authentication and session validation middleware to fetch user session data from Redis instead of a local in-memory store. This improves scalability and consistency in handling user sessions.
+3. Configured Environment Variables for Redis – Updated the server configuration to load Redis connection settings (host, port, password) from environment variables, making it adaptable for different deployment environments.
 
 I also needed to research on Youtube and Google the following things:
 
-1. <Insert Video or Link to thing you needed to research>
+1. how to incorperate redis, Watched lecture again
 
 ---
 
 Kamil Bozkurt:
 I worked on the following tasks:
 
-1. <Insert Some Task Here> - This task is responsible for xyz functionality.
+1. Hashing the user password for security by using bcrypt - This task is responsible for security functionality.
 2. <Insert Some Task Here> - This task is responsible for xyz functionality.
 3. <Insert Some Task Here> - This task is responsible for xyz functionality.
 

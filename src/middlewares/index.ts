@@ -1,22 +1,35 @@
+
 import { Context, Next } from "hono";
 import { StatusCode } from "hono/utils/http-status";
-import { _sessionStore } from "../database/sessionDB";
 import { getCookie } from "hono/cookie";
+import { redisClient } from "../database/sessionDB";
 
 export const forwardAuthMiddleware = async (c: Context, next: Next) => {
   const sessionId = getCookie(c, "session");
-  if (!sessionId || !_sessionStore.has(sessionId)) {
+  if (!sessionId) {
     return await next();
   }
+
+  const userId = await redisClient.get(sessionId);
+  if (!userId) {
+    return await next();
+  }
+
   return c.redirect("/posts");
 };
 
 export const authMiddleware = async (c: Context, next: Next) => {
   const sessionId = getCookie(c, "session");
-  if (!sessionId || !_sessionStore.has(sessionId)) {
+  if (!sessionId) {
     return c.redirect("/auth/login");
   }
-  c.set("userId", _sessionStore.get(sessionId)); // Store user ID for later use
+
+  const userId = await redisClient.get(sessionId);
+  if (!userId) {
+    return c.redirect("/auth/login");
+  }
+
+  c.set("userId", userId);
   await next();
 };
 

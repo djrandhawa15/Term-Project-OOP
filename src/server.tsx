@@ -6,13 +6,18 @@ import { serveStatic } from "@hono/node-server/serve-static";
 import { logger } from "hono/logger";
 import { RedisStoreAdapter } from "./lib";
 import Redis from "ioredis";
-import { CookieStore, sessionMiddleware } from "hono-sessions";
+import { CookieStore, sessionMiddleware, Session} from "hono-sessions";
 
+type SessionDataTypes = {
+  'counter': number
+}
 
 export class App {
-  private _app: Hono;
+  private _app;
+  private _store: CookieStore | RedisStoreAdapter;
   constructor(controllers: IController[]) {
     this._app = new Hono({ strict: false });
+    this._store = this.createStore();
     this.initMiddleware();
     this.initControllers(controllers);
     this.initErrorHandling();
@@ -22,31 +27,29 @@ export class App {
     return this._app;
   }
 
+  private createStore() {
+      const redisClient = {
+        ttl: 3600,
+        prefix: "MySession:",
+        client: new Redis({
+          host: "redis-18283.c285.us-west-2-2.ec2.redns.redis-cloud.com",
+          port: 18283,
+          password: "0q8AF1ZfJu3It7YCSckYZteDlQZ0xADr",
+          username: "default",
+        })
+      }
+      
+      let store = new RedisStoreAdapter(redisClient);
+      return store;
+  }
+
   private async initMiddleware() {
     
     this._app.use("*", logger(), prettyJSON());
     this._app.use("/static/*", serveStatic({ root: "./" }));
     // const store = new CookieStore();
-    let store;
-    //for production maybe
-    // const store = new redisStoreAdapter({
-    if (process.env.NODE_ENV === "production") {
-      const redisClient = {
-        ttl: 3600,
-        prefix: "MySession:",
-        client: new Redis({
-          host: process.env.REDIS_HOST || "127.0.0.1",
-          port: parseInt(process.env.REDIS_PORT || "6379"),
-          password: process.env.REDIS_PASSWORD || undefined,
-        })
-      }
-      
-      store = new RedisStoreAdapter(redisClient);
-    } else {
-      store = new CookieStore();
-    }
     this._app.use('*', sessionMiddleware({
-      store,
+      store: this._store,
       encryptionKey: 'password_at_least_32_characters_long', // Required for CookieStore, recommended for others
       expireAfterSeconds: 900, // Expire session after 15 minutes of inactivity
       cookieOptions: {

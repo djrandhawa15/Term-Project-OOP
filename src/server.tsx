@@ -4,8 +4,9 @@ import { IController } from "./shared/interfaces";
 import { prettyJSON } from "hono/pretty-json";
 import { serveStatic } from "@hono/node-server/serve-static";
 import { logger } from "hono/logger";
-import { Session, sessionMiddleware, CookieStore, RedisStoreAdapter } from "hono-sessions-redis";
+import { RedisStoreAdapter } from "./lib";
 import Redis from "ioredis";
+import { CookieStore, sessionMiddleware } from "hono-sessions";
 
 
 export class App {
@@ -30,11 +31,16 @@ export class App {
     //for production maybe
     // const store = new redisStoreAdapter({
     if (process.env.NODE_ENV === "production") {
-      const redisClient = new Redis({
-        host: process.env.REDIS_HOST || "127.0.0.1",
-        port: parseInt(process.env.REDIS_PORT || "6379"),
-        password: process.env.REDIS_PASSWORD || undefined,
-      });
+      const redisClient = {
+        ttl: 3600,
+        prefix: "MySession:",
+        client: new Redis({
+          host: process.env.REDIS_HOST || "127.0.0.1",
+          port: parseInt(process.env.REDIS_PORT || "6379"),
+          password: process.env.REDIS_PASSWORD || undefined,
+        })
+      }
+      
       store = new RedisStoreAdapter(redisClient);
     } else {
       store = new CookieStore();

@@ -4,11 +4,8 @@ import { IController } from "./shared/interfaces";
 import { prettyJSON } from "hono/pretty-json";
 import { serveStatic } from "@hono/node-server/serve-static";
 import { logger } from "hono/logger";
-import { 
-  Session,
-  sessionMiddleware, 
-  CookieStore 
-} from 'hono-sessions'
+import { Session, sessionMiddleware, CookieStore, RedisStore } from "hono-sessions-redis";
+import Redis from "ioredis";
 
 
 export class App {
@@ -25,11 +22,23 @@ export class App {
   }
 
   private async initMiddleware() {
+    
     this._app.use("*", logger(), prettyJSON());
     this._app.use("/static/*", serveStatic({ root: "./" }));
-    const store = new CookieStore()
+    // const store = new CookieStore();
+    let store;
     //for production maybe
     // const store = new redisStore({
+    if (process.env.NODE_ENV === "production") {
+      const redisClient = new Redis({
+        host: process.env.REDIS_HOST || "127.0.0.1",
+        port: parseInt(process.env.REDIS_PORT || "6379"),
+        password: process.env.REDIS_PASSWORD || undefined,
+      });
+      store = new RedisStore(redisClient);
+    } else {
+      store = new CookieStore();
+    }
     this._app.use('*', sessionMiddleware({
       store,
       encryptionKey: 'password_at_least_32_characters_long', // Required for CookieStore, recommended for others

@@ -31,7 +31,7 @@ I also needed to research on Youtube and Google the following things:
 Kamil Bozkurt:
 I worked on the following tasks:
 
-1. <Insert Some Task Here> - This task is responsible for xyz functionality.
+1. Hashing the user password for security by using bcrypt - This task is responsible for security functionality.
 2. <Insert Some Task Here> - This task is responsible for xyz functionality.
 3. <Insert Some Task Here> - This task is responsible for xyz functionality.
 

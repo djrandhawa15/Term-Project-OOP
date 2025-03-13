@@ -6,10 +6,12 @@ import { zValidator as validate } from "@hono/zod-validator";
 import { UserDTO } from "../../shared/dtos";
 import { randomUUID } from "node:crypto";
 import { getCookie, setCookie } from "hono/cookie";
-import { _sessionStore } from "../../database/sessionDB";
+import { redisClient } from "../../database/sessionDB";
 import { authMiddleware, forwardAuthMiddleware } from "../../middlewares";
 import { Profile } from "./views/Profile";
 import { Header } from "../Posts/views/Header";
+import '../../types';
+
 
 export class AuthController extends BaseController implements IController {
   public readonly path: string = "/auth";
@@ -63,14 +65,11 @@ export class AuthController extends BaseController implements IController {
       try {
       const validatedUser = c.req.valid("form");
       const createdUser = await this._authService.createUser(validatedUser)
-      const sessionId = randomUUID(); 
-      _sessionStore.set(sessionId, createdUser.email);
-      setCookie(c, "session", sessionId, {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === "production",
-        maxAge: 30 * 60, // 30min
-        path: "/",
-      });
+      
+      
+      const session = c.get('session');
+      session.set('user', createdUser.email);
+
       return c.redirect("/");
 
   } catch (error) {
@@ -98,18 +97,12 @@ export class AuthController extends BaseController implements IController {
     validate("form", UserDTO),
     async (c) => {
       try {
-      const validatedUser = c.req.valid("form");
-      const foundUser = await this._authService.loginUser(validatedUser);
-      const sessionId = randomUUID(); // Generate unique session ID
-      _sessionStore.set(sessionId, foundUser.email);
-      
-      
-      setCookie(c, "session", sessionId, {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === "production",
-        maxAge: 30 * 60, // 30min
-        path: "/",
-      });
+        const validatedUser = c.req.valid("form");
+        const foundUser = await this._authService.loginUser(validatedUser);
+
+        const session = c.get('session');
+        session.set('user', foundUser.email);
+        
       return c.redirect("/");
     } catch (error) {
       return c.render(
@@ -122,18 +115,9 @@ export class AuthController extends BaseController implements IController {
   );
 
   private logoutUser = this.factory.createHandlers(async (c) => {
-    const sessionId = getCookie(c, "session");
-    if (sessionId) {
-      _sessionStore.delete(sessionId); // Remove session from memory
-    }
-
-    // Clear the session cookie
-    setCookie(c, "session", "", {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      maxAge: 0, // Expire immediately
-      path: "/",
-    });
+    
+    const session = c.get('session');
+    session.set('user', undefined);
 
     return c.redirect("/auth/login");
   });

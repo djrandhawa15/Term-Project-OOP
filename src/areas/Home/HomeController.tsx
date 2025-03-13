@@ -2,7 +2,7 @@ import { Layout } from "../../shared/Layout";
 import { IController } from "../../shared/interfaces";
 import { BaseController } from "../../shared/BaseController";
 import { Index } from "./views/index";
-// import { forwardAuthMiddleware } from "../../middlewares";
+import { forwardAuthMiddleware } from "../../middlewares";
 
 export class HomeController extends BaseController implements IController {
   public readonly path: string = "/";
@@ -16,7 +16,7 @@ export class HomeController extends BaseController implements IController {
     // Register Routes
     this.router.get(
       `${this.path}/*`,
-      // forwardAuthMiddleware,
+      forwardAuthMiddleware,
       ...this.showHomePage
     );
   }

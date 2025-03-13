@@ -1,37 +1,46 @@
-
 import { Context, Next } from "hono";
+import { getCookie, setCookie } from "hono/cookie";
+import { redisClient } from "../database/sessionDB";
+import { randomUUID } from "crypto";
 import { StatusCode } from "hono/utils/http-status";
-// import { getCookie } from "hono/cookie";
-// import { redisClient } from "../database/sessionDB";
+import { Session } from "hono-sessions";
 
-// export const forwardAuthMiddleware = async (c: Context, next: Next) => {
-//   const sessionId = getCookie(c, "session");
-//   if (!sessionId) {
-//     return await next();
-//   }
 
-//   const userId = await redisClient.get(sessionId);
-//   if (!userId) {
-//     return await next();
-//   }
+/**
+ * Forward authentication middleware
+ * Redirects authenticated users away from auth pages
+ */
+export const forwardAuthMiddleware = async (c: Context, next: Next) => {
+  try {
+    const session = c.get("session");
+    const user = session.get('user');
+    if (user) {
+      return c.redirect("/posts");
+    }
+    
+    return await next();
+  } catch (error) {
+    console.log("Error in forwardAuthMiddleware:", error);
+    return await next();
+  }
+};
 
-//   return c.redirect("/posts");
-// };
+export const authMiddleware = async (c: Context, next: Next) => {
+  try {
+    const session = c.get("session");
+    const user = session.get('user');
 
-// export const authMiddleware = async (c: Context, next: Next) => {
-//   const sessionId = getCookie(c, "session");
-//   if (!sessionId) {
-//     return c.redirect("/auth/login");
-//   }
+  if (!user) {
+    return c.redirect("/auth/login");
+  }
 
-//   const userId = await redisClient.get(sessionId);
-//   if (!userId) {
-//     return c.redirect("/auth/login");
-//   }
-
-//   c.set("userId", userId);
-//   await next();
-// };
+  c.set("userId", user); 
+  await next();
+} catch (error) {
+  console.log("Error in authMiddleware:", error);
+  return c.redirect("/auth/login");
+}
+};
 
 export const errorHandler = (c: Context, status: number = 401) => {
   return c.json(
@@ -40,7 +49,7 @@ export const errorHandler = (c: Context, status: number = 401) => {
       message: c.error?.message,
       stack: process.env.NODE_ENV === "production" ? null : c.error?.stack,
     },
-    status as StatusCode
+    status as any
   );
 };
 

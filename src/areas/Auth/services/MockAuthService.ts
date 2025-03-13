@@ -37,7 +37,7 @@ export class MockAuthService implements IAuthService {
   }
   async createUser(user: IUser): Promise<IUser> {
     try {
-    const existingUser = await this.findUserByEmail(user.email);
+    await this.findUserByEmail(user.email);
       throw new Error(`User with email ${user.email} already exists`);
     } catch (error) {
       if (error instanceof Error && error.message === "Invalid Login Credentials") {

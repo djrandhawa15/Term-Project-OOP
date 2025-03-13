@@ -8,15 +8,16 @@ import { RedisStoreAdapter } from "./lib";
 import Redis from "ioredis";
 import { CookieStore, sessionMiddleware, Session} from "hono-sessions";
 
-type SessionDataTypes = {
-  'counter': number
-}
+import dotenv from 'dotenv';
+import path from 'path';
 
 export class App {
   private _app;
   private _store: CookieStore | RedisStoreAdapter;
+
   constructor(controllers: IController[]) {
     this._app = new Hono({ strict: false });
+
     this._store = this.createStore();
     this.initMiddleware();
     this.initControllers(controllers);
@@ -31,6 +32,7 @@ export class App {
       const redisClient = {
         ttl: 3600,
         prefix: "MySession:",
+        
         client: new Redis({
           host: "redis-18283.c285.us-west-2-2.ec2.redns.redis-cloud.com",
           port: 18283,
@@ -47,15 +49,14 @@ export class App {
     
     this._app.use("*", logger(), prettyJSON());
     this._app.use("/static/*", serveStatic({ root: "./" }));
-    // const store = new CookieStore();
     this._app.use('*', sessionMiddleware({
       store: this._store,
-      encryptionKey: 'password_at_least_32_characters_long', // Required for CookieStore, recommended for others
-      expireAfterSeconds: 900, // Expire session after 15 minutes of inactivity
+      encryptionKey: 'password_at_least_32_characters_long', 
+      expireAfterSeconds: 900, 
       cookieOptions: {
-        sameSite: 'Lax', // Recommended for basic CSRF protection in modern browsers
-        path: '/', // Required for this library to work properly
-        httpOnly: true, // Recommended to avoid XSS attacks
+        sameSite: 'Lax', 
+        path: '/', 
+        httpOnly: true, 
       },
     }))
   }

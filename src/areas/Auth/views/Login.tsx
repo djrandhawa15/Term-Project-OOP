@@ -1,36 +1,35 @@
-export function Login({ error }: { error?: string}) {
+import { Error } from "./ErrorBox";
+type Props = {
+  error: string;
+};
+export function Login({ error }: Props) {
   return (
     <div class="bg-white font-family-karla h-screen">
       <div class="w-full flex flex-wrap">
         <div class="w-full md:w-1/2 flex flex-col">
           <div class="flex justify-center md:justify-start pt-12 md:pl-12 md:-mb-24">
-            <a href="#" class="bg-black text-white font-bold text-xl p-4 ">
+            <a href="#" class="bg-black text-white font-bold text-xl p-4">
               devHouse
             </a>
           </div>
 
           <div class="flex flex-col justify-center md:justify-start my-auto pt-8 md:pt-0 px-8 md:px-24 lg:px-32">
-            <p class="text-center text-3xl ">Welcome back.</p>
-
+            {error && <Error>{error}</Error>}
+            <p class="text-center text-3xl">Welcome back.</p>
             <form
               class="flex flex-col pt-3 md:pt-8"
               method="post"
               action="/auth/login"
             >
-
-{error && (
-  <p class="text-red-700 pt-4 mb-2 text-center" role="alert">{error}</p>
-            )}
-            
               <div class="flex flex-col pt-4">
                 <label for="email" class="text-lg">
                   Email
                 </label>
                 <input
                   type="email"
+                  required
                   id="email"
                   name="email"
-                  required
                   placeholder="your@email.com"
                   class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 mt-1 leading-tight focus:outline-none focus:shadow-outline"
                 />

@@ -2,16 +2,11 @@ import { Layout } from "../../shared/Layout";
 import { Login, Register } from "./views";
 import { IController, IAuthService } from "../../shared/interfaces";
 import { BaseController } from "../../shared/BaseController";
-import { zValidator as validate } from "@hono/zod-validator";
+import { z } from "zod";
 import { UserDTO } from "../../shared/dtos";
-import { randomUUID } from "node:crypto";
-import { getCookie, setCookie } from "hono/cookie";
-import { redisClient } from "../../database/sessionDB";
 import { authMiddleware, forwardAuthMiddleware } from "../../middlewares";
 import { Profile } from "./views/Profile";
 import { Header } from "../Posts/views/Header";
-import '../../types';
-
 
 export class AuthController extends BaseController implements IController {
   public readonly path: string = "/auth";
@@ -51,74 +46,68 @@ export class AuthController extends BaseController implements IController {
    *  Register Routes  *
    *********************
    */
-  private showRegisterPage = this.factory.createHandlers((c) =>
-    c.render(
+  private showRegisterPage = this.factory.createHandlers((c) => {
+    const error = c.req.query("error") || "";
+    return c.render(
       <Layout>
-        <Register />
+        <Register error={error} />
       </Layout>
-    )
-  );
+    );
+  });
 
-  private registerUser = this.factory.createHandlers(
-    validate("form", UserDTO),
-    async (c) => {
-      try {
-      const validatedUser = c.req.valid("form");
-      const createdUser = await this._authService.createUser(validatedUser)
-      
-      
-      const session = c.get('session');
-      session.set('user', createdUser.email);
-
-      return c.redirect("/");
-
-  } catch (error) {
-    return c.render(  <Layout>
-    <Register error={(error as Error).message}/>
-    </Layout>
-);
-  }
-}
-  );
+  private registerUser = this.factory.createHandlers(async (c) => {
+    const { error, data: validatedUser } = UserDTO.safeParse(
+      await c.req.parseBody()
+    );
+    if (error) return c.redirect("/auth/login");
+    try {
+      const newUser = await this._authService.createUser(validatedUser);
+      const session = c.get("session");
+      session.set("userId", newUser.id || null);
+    } catch (error: any) {
+      return c.redirect(
+        `/auth/register?error=${encodeURIComponent(error.message)}`
+      );
+    }
+    return c.redirect("/auth/login");
+  });
   /*
    *********************
    *   Login Routes    *
    *********************
    */
-  private showLoginPage = this.factory.createHandlers((c) =>
-    c.render(
+  private showLoginPage = this.factory.createHandlers((c) => {
+    const error = c.req.query("error") || "";
+    return c.render(
       <Layout>
-        <Login />
+        <Login error={error} />
       </Layout>
-    )
-  );
-
-  private loginUser = this.factory.createHandlers(
-    validate("form", UserDTO),
-    async (c) => {
-      try {
-        const validatedUser = c.req.valid("form");
-        const foundUser = await this._authService.loginUser(validatedUser);
-
-        const session = c.get('session');
-        session.set('user', foundUser.email);
-        
-      return c.redirect("/");
-    } catch (error) {
-      return c.render(
-        <Layout>
-          <Login error={(error as Error).message} />
-        </Layout>
     );
+  });
+
+  private loginUser = this.factory.createHandlers(async (c) => {
+    try {
+      const validatedUser = UserDTO.parse(await c.req.parseBody());
+      const foundUser = await this._authService.loginUser(validatedUser);
+      const session = c.get("session");
+      session.set("userId", foundUser.id!);
+      return c.redirect("/posts");
+    } catch (err) {
+      let errorMessage = "";
+      if (err instanceof z.ZodError) {
+        errorMessage = err.issues[0].message;
+      } else if (err instanceof Error) {
+        errorMessage = err.message;
+      }
+      return c.redirect(
+        `/auth/login?error=${encodeURIComponent(errorMessage)}`
+      );
     }
-  }
-  );
+  });
 
   private logoutUser = this.factory.createHandlers(async (c) => {
-    
-    const session = c.get('session');
-    session.set('user', undefined);
-
+    const session = c.get("session");
+    session.set("userId", null);
     return c.redirect("/auth/login");
   });
   /*

@@ -1,12 +1,12 @@
 import { IPost, IUser } from "../shared/dtos";
 
-export const db: IUser[] = [
-  {
-    id: 1,
-    email: "john123@gmail.com",
-    password: "$2a$10$RxD5Yl5DyPk9Mv9A3y0M8eJgHqhnWaMdK964Mt7Ef/v1oI9/ideUK",
-  },
-];
+// export const db: IUser[] = [
+//   {
+//     id: 1,
+//     email: "john123@gmail.com",
+//     password: "123456",
+//   },
+// ];
 
 export const postsDb: IPost[] = [
   {

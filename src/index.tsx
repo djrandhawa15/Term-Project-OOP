@@ -1,11 +1,11 @@
 import { HomeController, PostController, AuthController } from "./areas";
 import { MockAuthService, MockPostsService } from "./areas";
+import { AuthService } from "./areas/Auth/services/AuthService";
 import { App } from "./server";
 
-// localhost:3000/auth/login
 const app = new App([
   new HomeController(),
-  new AuthController(new MockAuthService()),
+  new AuthController(new AuthService()),
   new PostController(new MockPostsService()),
 ]).build();
 

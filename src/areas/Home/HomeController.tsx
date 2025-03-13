@@ -8,7 +8,7 @@ export class HomeController extends BaseController implements IController {
   public readonly path: string = "/";
 
   constructor() {
-    super();
+    super(); // BaseController.constructor()
     this.initializeRoutes();
   }
 
@@ -27,21 +27,10 @@ export class HomeController extends BaseController implements IController {
    *********************
    */
   private showHomePage = this.factory.createHandlers((c) => {
-    // const session = c.get("session");
-    // @ts-ignore
-    const session = c.get("session");
-    // @ts-ignore
-    session.set('counter', (session.get('counter') || 0) + 1);
-    // @ts-ignore
-    console.log(session.get('counter'));
-
-    // session.set('counter', (session.get('counter') || 0) + 1)
     return c.html(
       <Layout>
         <Index />
       </Layout>
-    )
-
-  }
-  );
+    );
+  });
 }

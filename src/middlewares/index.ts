@@ -1,46 +1,23 @@
 import { Context, Next } from "hono";
-import { getCookie, setCookie } from "hono/cookie";
-import { redisClient } from "../database/sessionDB";
-import { randomUUID } from "crypto";
 import { StatusCode } from "hono/utils/http-status";
-import { Session } from "hono-sessions";
+import { createMiddleware } from "hono/factory";
+import { db } from "../database/client";
 
-
-/**
- * Forward authentication middleware
- * Redirects authenticated users away from auth pages
- */
 export const forwardAuthMiddleware = async (c: Context, next: Next) => {
-  try {
-    const session = c.get("session");
-    const user = session.get('user');
-    if (user) {
-      return c.redirect("/posts");
-    }
-    
-    return await next();
-  } catch (error) {
-    console.log("Error in forwardAuthMiddleware:", error);
-    return await next();
-  }
-};
-
-export const authMiddleware = async (c: Context, next: Next) => {
-  try {
-    const session = c.get("session");
-    const user = session.get('user');
-
+  const user = c.get("user");
   if (!user) {
-    return c.redirect("/auth/login");
+    return await next();
   }
-
-  c.set("userId", user); 
-  await next();
-} catch (error) {
-  console.log("Error in authMiddleware:", error);
-  return c.redirect("/auth/login");
-}
+  return c.redirect("/posts");
 };
+
+export const authMiddleware = createMiddleware(async (c, next) => {
+  const user = c.get("user");
+  if (user) {
+    return await next();
+  }
+  return c.redirect("/auth/login");
+});
 
 export const errorHandler = (c: Context, status: number = 401) => {
   return c.json(
@@ -49,7 +26,7 @@ export const errorHandler = (c: Context, status: number = 401) => {
       message: c.error?.message,
       stack: process.env.NODE_ENV === "production" ? null : c.error?.stack,
     },
-    status as any
+    status as StatusCode
   );
 };
 
@@ -62,3 +39,22 @@ export const notFound = (c: Context) => {
     404
   );
 };
+
+// TODO: Refactor this file so we can inject a service into it.
+// I know my implementation of this method is gross but it's 4am and I'm tired
+// so let's just move along...(feel free to improve it, it's just a sample)
+export const deserializeUser = createMiddleware(async (c, next) => {
+  const session = c.get("session");
+  const userId = session.get("userId");
+  if (!userId) {
+    c.set("user", null);
+  } else {
+    const user = await db.user.findUnique({ where: { id: userId } });
+    if (!user) {
+      c.set("user", null);
+    } else {
+      c.set("user", user);
+    }
+  }
+  await next();
+});

@@ -1,59 +1,57 @@
-import { db } from "../../../database/fakeDB";
-import { IUser } from "../../../shared/dtos";
+import { PrismaClient } from "@prisma/client";
+import { db } from "../../../database/client";
 import { IAuthService } from "../../../shared/interfaces";
+import { IUser } from "../../../shared/dtos";
 import bcrypt from "bcrypt";
 
 
 export class AuthService implements IAuthService {
+  private readonly SALT_ROUNDS = 10;
 
-  async findUserByEmail(email: String): Promise<IUser> {
-  return new Promise((resolve, reject) => {
+  async createUser(user: Omit<IUser, "id">): Promise<IUser> {
+    const userExists = await db.user.findUnique({
+      where: { email: user.email },
+    });
 
-    const user = db.find( user => user.email === email);
+    if (!userExists) {
 
-    if (user) {
-      resolve(user);
+      const partEmail = user.email.split('@')[0];
+      const randomNumbers = Math.floor(Math.random() * 900 + 100);
+      const username = partEmail + randomNumbers;
+
+      const hashedPassword = await bcrypt.hash(user.password, this.SALT_ROUNDS);
+            
+      const userData = {
+          email: user.email,
+          password: hashedPassword,
+          username: username
+      };
+
+      const createdUser = await db.user.create({ data: userData });
+      return createdUser;
+    } else {
+      throw new Error(
+        "That email has already been taken. Please try another one."
+      );
     }
-      else {
-        reject(new Error("Invalid Login Credentials"));
-      }        
-  });
-}
-
-async findUserByEmailAndPassword(email: string, password: string): Promise<IUser | undefined> {
-    for(const user of db) {
-         if(user.email === email) {
-           const isMatch = await bcrypt.compare(password, user.password);
-           if(isMatch) {
-             return user;
-           }
-         }
-       }
-       return undefined;
-   
-     }
-
- async createUser(user: IUser): Promise<IUser> {
-  try {
-    await this.findUserByEmail(user.email);
-      throw new Error(`User with email ${user.email} already exists`);
-  } catch (error) {
-       if (error instanceof Error && error.message === "Invalid Login Credentials") {
-         const saltRounds = 10;
-         const hashedPassword = await bcrypt.hash(user.password, saltRounds);
-         const newUser = { id: Date.now(), posts: [], ...user, password: hashedPassword };
-       db.push(newUser);
-       return newUser
-    } throw error;
- 
-   }
   }
 
-   async loginUser(user: IUser): Promise<IUser> {
-    const foundUser = await this.findUserByEmailAndPassword(user.email, user.password);
+  async loginUser(user: IUser): Promise<IUser> {
+    const foundUser = await db.user.findUnique({
+      where: { email: user.email },
+    });
+    
     if (!foundUser) {
-      throw new Error("Invalid Login Credentials. Please try again.");
+      throw new Error(" Invalid Login Credentials. Please try again.");
     }
+    
+    const passwordMatch = await bcrypt.compare(user.password, foundUser.password);
+    
+    if (!passwordMatch) {
+      throw new Error(" Invalid Login Credentials. Please try again.");
+    }
+    
     return foundUser;
   }
 }
+

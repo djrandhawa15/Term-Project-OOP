@@ -16,8 +16,21 @@ export class AuthService implements IAuthService {
     if (!userExists) {
 
       const partEmail = user.email.split('@')[0];
+      let username = partEmail;
+      let isUnique = false;
+
+      while(!isUnique) {
+        const usernameExists = await db.user.findUnique({
+          where: { username },
+        });
+
+        if (!usernameExists) {
+          isUnique = true;
+        } else {
       const randomNumbers = Math.floor(Math.random() * 900 + 100);
-      const username = partEmail + randomNumbers;
+      username = partEmail + randomNumbers;
+        }
+      }
 
       const hashedPassword = await bcrypt.hash(user.password, this.SALT_ROUNDS);
             

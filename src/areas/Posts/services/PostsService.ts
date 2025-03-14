@@ -28,11 +28,6 @@ export class PostsService implements IPostsService {
       },
       include: { user: true },
     });
-    console.log("New post created:", newPost);
-
-    const allPosts = await db.post.findMany();
-    console.log("All posts in database:", allPosts);
-
 
     return {
       id: newPost.id,

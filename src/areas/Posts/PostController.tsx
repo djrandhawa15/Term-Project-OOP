@@ -47,14 +47,8 @@ export class PostController extends BaseController implements IController {
     if(!user) {
       return c.redirect("/auth/login");
     } 
-
-    console.log("Attempting to create post with content:", content, "and user id:", user.id);
-
     try {
       await this._postsService.createPost({ text: content }, user.id)
-      
-      console.log("createPost service method returned successfully.");
-
     } catch (error) {
       console.error("Error creating post", error)
     }

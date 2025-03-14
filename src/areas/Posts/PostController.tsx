@@ -17,6 +17,8 @@ export class PostController extends BaseController implements IController {
   }
 
   private initializeRoutes() {
+    this.router.post(`${this.path}`, authMiddleware, ...this.createPosts)
+
     this.router.post(
       `${this.path}/:id/comment`,
       authMiddleware,
@@ -34,6 +36,30 @@ export class PostController extends BaseController implements IController {
     );
     this.router.get(`${this.path}/*`, authMiddleware, ...this.showPostsPage);
   }
+
+
+  // Create Posts
+  private createPosts = this.factory.createHandlers(async(c) => {
+    const body = await c.req.parseBody();
+    const rawContent = body.content || body.text;
+    const content = typeof rawContent === "string" ? rawContent : ""
+    const user = c.get("user");
+    if(!user) {
+      return c.redirect("/auth/login");
+    } 
+
+    console.log("Attempting to create post with content:", content, "and user id:", user.id);
+
+    try {
+      await this._postsService.createPost({ text: content }, user.id)
+      
+      console.log("createPost service method returned successfully.");
+
+    } catch (error) {
+      console.error("Error creating post", error)
+    }
+    return c.redirect("/posts")
+  })
 
   /*
    *********************

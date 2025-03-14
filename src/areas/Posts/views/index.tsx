@@ -9,7 +9,8 @@ export function Index({ posts }: Props) {
     <div className="min-h-screen">
       <main className="max-w-2xl mx-auto">
         <div className="bg-white rounded-lg shadow-sm mt-4 p-4 hover:bg-gray-100 transition-all duration-300 ease-in-out">
-          <form onSubmit={() => {}}>
+          {/* <form onSubmit={() => {}}> */}
+          <form action="/posts" method="post">
             <div className="flex space-x-4">
               <div className="w-10 h-10 rounded-full bg-indigo-100 flex-shrink-0 flex items-center justify-center overflow-hidden">
                 <img
@@ -20,10 +21,11 @@ export function Index({ posts }: Props) {
               </div>
               <div className="flex-grow">
                 <textarea
+                  name="content"
                   className="w-full border-0 text-lg resize-none placeholder-gray-400 p-2 rounded outline-none hover:bg-gray-100 transition-all duration-300 ease-in-out"
                   placeholder="What's happening?"
                   rows={3}
-                  value={"New Post"}
+                  // value={"New Post"}
                 ></textarea>
               </div>
             </div>

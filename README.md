@@ -11,19 +11,23 @@ I also watched the videos posted regarding using testing files with Prisma.
 
 Dilraj Randhawa: I worked on the following tasks:
 
-- This task is responsible for xyz functionality.
-- This task is responsible for xyz functionality.
-- This task is responsible for xyz functionality.
+1. Created a script inside your project called seed.ts which creates fake users/posts into your database 
+2. ensure that you have a package.json script called seed
 
 I also needed to research on Youtube and Google the following things:
+
+What is seed used for, prisma videos given by aarman, what is prisma used for
+
+How to impliment seed, i watched an example
 
 ---
 
 Kamil Bozkurt: I worked on the following tasks:
 
-- Adding posting functionality
-- I implemented the functionality with real database instead of fake database. Which is Prisma
+1. Adding posting functionality
+2. I implemented the functionality with real database instead of fake database. Which is Prisma
 
 I also needed to research on Youtube and Google the following things:
 
 How to work with prisma and how to see the prisma studio properly.
+

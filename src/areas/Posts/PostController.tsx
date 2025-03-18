@@ -5,6 +5,7 @@ import { Index } from "./views/index";
 import { authMiddleware } from "../../middlewares";
 import { Header } from "./views/Header";
 import { EditPost } from "./views/EditPost";
+import { PostSchema } from "@/shared/dtos";
 
 export class PostController extends BaseController implements IController {
   public readonly path: string = "/posts";
@@ -41,14 +42,17 @@ export class PostController extends BaseController implements IController {
   // Create Posts
   private createPosts = this.factory.createHandlers(async(c) => {
     const body = await c.req.parseBody();
-    const rawContent = body.content || body.text;
-    const content = typeof rawContent === "string" ? rawContent : ""
+    const validatedPost = PostSchema.parse(body)
+    // const rawContent = body.content || body.text;
+    // const content = typeof rawContent === "string" ? rawContent : ""
     const user = c.get("user");
     if(!user) {
       return c.redirect("/auth/login");
     } 
     try {
-      await this._postsService.createPost({ text: content }, user.id)
+      if (typeof body.content === "string") {
+        await this._postsService.createPost({ text: body.content }, user.id);
+      }    
     } catch (error) {
       console.error("Error creating post", error)
     }
@@ -73,38 +77,40 @@ export class PostController extends BaseController implements IController {
     );
   });
 
-  private editPostPage = this.factory.createHandlers((c) => {
+  private editPostPage = this.factory.createHandlers(async(c) => {
     const id = c.req.param("id");
-    const posts = [
-      {
-        id: 1,
-        author: "Sarah Chen",
-        handle: "@sarahcodes",
-        avatar:
-          "https://morgancarter.com.au/assets/images/blog/encouraging-upload/thumbnail.png",
-        content:
-          "Just deployed my first React component library! Check out the documentation site I built using Tailwind and TypeScript.",
-        likes: 423,
-        liked: false,
-        time: "2h",
-      },
-      {
-        id: 2,
-        author: "DevHouse Team",
-        handle: "@devhouse",
-        avatar:
-          "https://morgancarter.com.au/assets/images/blog/encouraging-upload/thumbnail.png",
-        content:
-          "We're excited to announce our new community features! Join a coding circle and collaborate.",
-        likes: 1205,
-        liked: false,
-        time: "5h",
-      },
-    ];
+    if (!id) throw new Error("id missing");
+    const posts = await this._postsService.getPosts()
+    // const posts = [
+    //   {
+    //     id: 1,
+    //     author: "Sarah Chen",
+    //     handle: "@sarahcodes",
+    //     avatar:
+    //       "https://morgancarter.com.au/assets/images/blog/encouraging-upload/thumbnail.png",
+    //     content:
+    //       "Just deployed my first React component library! Check out the documentation site I built using Tailwind and TypeScript.",
+    //     likes: 423,
+    //     liked: false,
+    //     time: "2h",
+    //   },
+    //   {
+    //     id: 2,
+    //     author: "DevHouse Team",
+    //     handle: "@devhouse",
+    //     avatar:
+    //       "https://morgancarter.com.au/assets/images/blog/encouraging-upload/thumbnail.png",
+    //     content:
+    //       "We're excited to announce our new community features! Join a coding circle and collaborate.",
+    //     likes: 1205,
+    //     liked: false,
+    //     time: "5h",
+    //   },
+    // ];
     return c.render(
       <Layout>
         <Header />
-        <EditPost post={posts[parseInt(id)].content} />
+        <EditPost post={posts[parseInt(id)].text} />
       </Layout>
     );
   });

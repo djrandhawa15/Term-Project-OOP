@@ -6,12 +6,12 @@ const prisma = new PrismaClient();
 async function main() {
     console.log('Seeding database...');
 
-    // Create users with the correct fields
+// Create users
     const users = await Promise.all(
         Array.from({ length: 5 }).map(() =>
             prisma.user.create({
                 data: {
-                    username: faker.internet.username(), // ✅ Correct field
+                    username: faker.internet.username(), 
                     email: faker.internet.email(),
                     password: faker.internet.password(),
                 },
@@ -19,13 +19,13 @@ async function main() {
         )
     );
 
-    // Create posts for each user
+// Create posts for each user
     for (const user of users) {
         await Promise.all(
             Array.from({ length: 3 }).map(() =>
                 prisma.post.create({
                     data: {
-                        content: faker.lorem.paragraphs(2), // ✅ Your schema only has 'content'
+                        content: faker.lorem.paragraphs(2), 
                         userId: user.id,
                     },
                 })

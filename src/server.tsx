@@ -80,3 +80,4 @@ export class App {
     });
   }
 }
+// console.log("Using DATABASE_URL:", process.env.DATABASE_URL);

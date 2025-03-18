@@ -4,7 +4,8 @@
   "scripts": {
     "start": "vite",
     "build": "vite build --mode client && vite build",
-    "dev": "vite"
+    "dev": "vite",
+    "seed": "tsx prisma/seed.ts"
   },
   "dependencies": {
     "@hono/node-server": "^1.12.2",

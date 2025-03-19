@@ -5,7 +5,7 @@ import { Index } from "./views/index";
 import { authMiddleware } from "../../middlewares";
 import { Header } from "./views/Header";
 import { EditPost } from "./views/EditPost";
-import { PostSchema } from "@/shared/dtos";
+import { PostSchema } from "../../shared/dtos";
 
 export class PostController extends BaseController implements IController {
   public readonly path: string = "/posts";
@@ -43,8 +43,6 @@ export class PostController extends BaseController implements IController {
   private createPosts = this.factory.createHandlers(async(c) => {
     const body = await c.req.parseBody();
     const validatedPost = PostSchema.parse(body)
-    // const rawContent = body.content || body.text;
-    // const content = typeof rawContent === "string" ? rawContent : ""
     const user = c.get("user");
     if(!user) {
       return c.redirect("/auth/login");
@@ -81,32 +79,6 @@ export class PostController extends BaseController implements IController {
     const id = c.req.param("id");
     if (!id) throw new Error("id missing");
     const posts = await this._postsService.getPosts()
-    // const posts = [
-    //   {
-    //     id: 1,
-    //     author: "Sarah Chen",
-    //     handle: "@sarahcodes",
-    //     avatar:
-    //       "https://morgancarter.com.au/assets/images/blog/encouraging-upload/thumbnail.png",
-    //     content:
-    //       "Just deployed my first React component library! Check out the documentation site I built using Tailwind and TypeScript.",
-    //     likes: 423,
-    //     liked: false,
-    //     time: "2h",
-    //   },
-    //   {
-    //     id: 2,
-    //     author: "DevHouse Team",
-    //     handle: "@devhouse",
-    //     avatar:
-    //       "https://morgancarter.com.au/assets/images/blog/encouraging-upload/thumbnail.png",
-    //     content:
-    //       "We're excited to announce our new community features! Join a coding circle and collaborate.",
-    //     likes: 1205,
-    //     liked: false,
-    //     time: "5h",
-    //   },
-    // ];
     return c.render(
       <Layout>
         <Header />

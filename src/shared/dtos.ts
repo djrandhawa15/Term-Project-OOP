@@ -1,13 +1,21 @@
 import { z } from "zod";
 
-// Define User Schema
 export const UserDTO = z.object({
   id: z.number().optional(),
+  fName: z.string().min(2, "First name is required"),
+  lName: z.string().min(2, "Last name is required"),
+  username: z.string().min(6, "Username must be at least 3 characters"),
   email: z.string().email(),
   password: z.string().min(6, "Password must be at least 6 characters"),
   createdAt: z.string().optional(),
   updatedAt: z.string().optional(),
 });
+
+
+export const LoginDTO = z.object({
+  email: z.string().email(),
+  password: z.string()
+})
 
 export const PostSchema = z.object({
   id: z.number().optional(),
@@ -46,4 +54,5 @@ export type PostCreate = z.TypeOf<typeof postCreateSchema>;
 
 // Infer TypeScript type from schema
 export type IUser = z.infer<typeof UserDTO>;
+export type ILogin = z.infer<typeof LoginDTO>
 export type IPost = z.infer<typeof PostSchema>;

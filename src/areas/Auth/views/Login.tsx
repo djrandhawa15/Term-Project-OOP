@@ -1,7 +1,9 @@
 import { Error } from "./ErrorBox";
+
 type Props = {
   error: string;
 };
+
 export function Login({ error }: Props) {
   return (
     <div class="bg-white font-family-karla h-screen">
@@ -41,6 +43,7 @@ export function Login({ error }: Props) {
                 </label>
                 <input
                   type="password"
+                  required
                   id="password"
                   name="password"
                   placeholder="Password"

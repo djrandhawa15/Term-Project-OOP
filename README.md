@@ -1,33 +1,30 @@
-BREAKDOWN OF WORK: 18th March (Second Sprint)
+BREAKDOWN OF WORK: 25th March (Third Sprint)
 
 Robyn Downie: I worked on the following tasks:
 
-1. Create Prisma Schema to hold users information.
-2. Connect login and register pages to the Prisma Schema, including a check for existing usernames.
+1. 
+2. 
 
-I also watched the videos posted regarding using testing files with Prisma.
+I also needed to research on Youtube and Google the following things:
 
 ---
 
 Dilraj Randhawa: I worked on the following tasks:
 
-1. Created a script inside your project called seed.ts which creates fake users/posts into your database 
-2. ensure that you have a package.json script called seed
+1. 
+2. 
 
 I also needed to research on Youtube and Google the following things:
 
-What is seed used for, prisma videos given by aarman, what is prisma used for
 
-How to impliment seed, i watched an example
 
 ---
 
 Kamil Bozkurt: I worked on the following tasks:
 
-1. Adding posting functionality
-2. I implemented the functionality with real database instead of fake database. Which is Prisma
+1. 
+2. 
 
 I also needed to research on Youtube and Google the following things:
 
-How to work with prisma and how to see the prisma studio properly.
 

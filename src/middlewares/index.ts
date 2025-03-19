@@ -26,6 +26,7 @@ export const errorHandler = (c: Context, status: number = 401) => {
       message: c.error?.message,
       stack: process.env.NODE_ENV === "production" ? null : c.error?.stack,
     },
+    //@ts-ignore
     status as StatusCode
   );
 };

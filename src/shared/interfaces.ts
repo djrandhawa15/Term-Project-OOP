@@ -1,4 +1,4 @@
-import { IPost, IUser, PostCreate, PostDelete, postDeleteSchema } from "./dtos";
+import { IPost, IUser, ILogin, PostCreate, PostDelete, postDeleteSchema } from "./dtos";
 
 export interface IController {
   path: string;
@@ -7,7 +7,7 @@ export interface IController {
 
 export interface IAuthService {
   createUser(user: IUser): Promise<IUser>;
-  loginUser(user: IUser): Promise<IUser>;
+  loginUser(user: ILogin): Promise<IUser>;
 }
 
 export interface IPostsService {

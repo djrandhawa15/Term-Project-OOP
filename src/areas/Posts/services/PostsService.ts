@@ -1,5 +1,5 @@
 import { db } from "../../../database/client";
-import { IPost, IUser, PostCreate, PostDelete } from "../../../shared/dtos";
+import { IPost, IUser, PostCreate, PostDelete, PostUpdate } from "../../../shared/dtos";
 import { IPostsService } from "../../../shared/interfaces";
 
 export class PostsService implements IPostsService {
@@ -39,8 +39,75 @@ export class PostsService implements IPostsService {
       code: "",
     }
   }
-  deletePost(postId: PostDelete): Promise<void> {
-    throw new Error("Method not implemented.");   // Will add later
+  async deletePost(post: PostDelete, userId: number): Promise<void> {
+    // Check if the post belongs to this user
+    const existingPost = await db.post.findUnique({
+      where: { id: post.id },
+      include: { user: true }
+    });
+    
+    if (!existingPost) {
+      throw new Error("Post not found");
+    }
+    
+    if (existingPost.userId !== userId) {
+      throw new Error("You cannot delete posts you don't own");
+    }
+    
+    await db.post.delete({ 
+      where: { id: post.id }
+    })
   }
   
+  async updatePost(update: PostUpdate, userId: number): Promise<IPost> {
+    // Check if the post belongs to the user
+    const post = await db.post.findUnique({
+      where: { id: update.id },
+      include: { user: true }
+    });
+    
+    if (!post) {
+      throw new Error("Post not found");
+    }
+    
+    if (post.userId !== userId) {
+      throw new Error("You cannot edit posts you don't own");
+    }
+    
+    const updatedPost = await db.post.update({
+      where: { id: update.id},
+      data: { content: update.text},
+      include: { user: true }
+    })
+    return {
+      id: updatedPost.id,
+      author: updatedPost.user.username,
+      avatar: "https://morgancarter.com.au/assets/images/blog/encouraging-upload/thumbnail.png",
+      text: updatedPost.content,
+      likes: 0,
+      liked: false,
+      code: "",
+    }
+  }
+
+  async getPostById(postId: number): Promise<IPost | null> {
+    const post = await db.post.findUnique({
+      where: { id: postId },
+      include: { user: true }
+    });
+
+    if (!post) {
+      return null;
+    }
+
+    return {
+      id: post.id,
+      author: post.user.username,
+      avatar: "https://morgancarter.com.au/assets/images/blog/encouraging-upload/thumbnail.png",
+      text: post.content,
+      likes: 0,
+      liked: false,
+      code: "",
+    };
+  }
 }

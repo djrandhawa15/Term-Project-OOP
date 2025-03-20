@@ -6,6 +6,11 @@ import { authMiddleware } from "../../middlewares";
 import { Header } from "./views/Header";
 import { EditPost } from "./views/EditPost";
 import { PostSchema } from "../../shared/dtos";
+import {
+  postCreateSchema,
+  postUpdateSchema,
+  postDeleteSchema,
+} from "../../shared/dtos";
 
 export class PostController extends BaseController implements IController {
   public readonly path: string = "/posts";
@@ -36,13 +41,56 @@ export class PostController extends BaseController implements IController {
       ...this.editPostPage
     );
     this.router.get(`${this.path}/*`, authMiddleware, ...this.showPostsPage);
+
+    this.router.post(`${this.path}/delete/:id`, authMiddleware, ...this.deletePost)
+
+    this.router.post(`${this.path}/update/:id`, authMiddleware, ...this.updatePost)
+
+    this.router.get(`${this.path}/edit/:id`, authMiddleware, ...this.editPostPage)
   }
 
+  // Update Post
+  private updatePost = this.factory.createHandlers(async (c) => {
+    const id = c.req.param("id")
+    if(!id) throw new Error("Post ID Missing")
+    const body = await c.req.parseBody()
+    const updateData = postUpdateSchema.parse({ 
+      id: parseInt(id),
+      text: body.content || body.text
+    })
+    const user = c.get("user")
+    if(!user) return c.redirect("/auth/login")
+    try {
+      await this._postsService.updatePost(updateData, user.id)
+    } catch (error) {
+      console.error("Error updating post", error)
+      throw error;
+    }
+    return c.redirect("/posts")
+  })
+
+  // Delete Post
+  private deletePost = this.factory.createHandlers(async (c) => {
+    const id = c.req.param("id")
+    if(!id) throw new Error("Post ID missing")
+    
+    const user = c.get("user");
+    if (!user) return c.redirect("/auth/login");
+    
+    const deleteData = postDeleteSchema.parse({ id: parseInt(id)})
+    try {
+      await this._postsService.deletePost(deleteData, user.id)
+    } catch (error) {
+      console.error("Error deleting post", error)
+      throw error;
+    }
+    return c.redirect("/posts");
+  })
 
   // Create Posts
   private createPosts = this.factory.createHandlers(async(c) => {
     const body = await c.req.parseBody();
-    const validatedPost = PostSchema.parse(body)
+    // const validatedPost = PostSchema.parse(body)
     const user = c.get("user");
     if(!user) {
       return c.redirect("/auth/login");
@@ -78,11 +126,22 @@ export class PostController extends BaseController implements IController {
   private editPostPage = this.factory.createHandlers(async(c) => {
     const id = c.req.param("id");
     if (!id) throw new Error("id missing");
-    const posts = await this._postsService.getPosts()
+    const postId = parseInt(id)
+    
+    const user = c.get("user");
+    if (!user) return c.redirect("/auth/login");
+    
+    const postDetails = await this._postsService.getPostById(postId);
+    if (!postDetails) throw new Error("Post not found");
+    
+    if (postDetails.author !== user.username) {
+      throw new Error("You cannot edit posts you don't own");
+    }
+    
     return c.render(
       <Layout>
         <Header />
-        <EditPost post={posts[parseInt(id)].text} />
+        <EditPost post={postDetails.text} postId={postDetails.id!} />
       </Layout>
     );
   });

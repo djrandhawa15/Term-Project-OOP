@@ -81,5 +81,93 @@ export class AuthService implements IAuthService {
       updatedAt: foundUser.updatedAt.toISOString()
     };
   }
-}
 
+  async getUserById(id: number): Promise<IUser | null> {
+    const user = await db.user.findUnique({
+      where: { id },
+    });
+    
+    if (!user) return null;
+    
+    return {
+      id: user.id,
+      username: user.username,
+      email: user.email,
+      password: user.password,
+      fName: user.fName,
+      lName: user.lName,
+      createdAt: user.createdAt.toISOString(),
+      updatedAt: user.updatedAt.toISOString()
+    };
+  }
+
+  async updateUser(user: IUser): Promise<IUser> {
+    const existingUser = await db.user.findUnique({
+      where: { id: user.id },
+    });
+    
+    if (!existingUser) {
+      throw new Error("User not found");
+    }
+    
+    if (user.username && user.username !== existingUser.username) {
+      const usernameExists = await db.user.findFirst({
+        where: { 
+          username: user.username,
+          id: { not: existingUser.id } 
+        },
+      });
+      
+      if (usernameExists) {
+        throw new Error("Username already taken");
+      }
+    }
+    
+    if (user.email && user.email !== existingUser.email) {
+      const emailExists = await db.user.findFirst({
+        where: { 
+          email: user.email,
+          id: { not: existingUser.id }
+        },
+      });
+      
+      if (emailExists) {
+        throw new Error("Email already taken");
+      }
+    }
+    
+    type UserUpdate = Partial<Omit<IUser, 'id' | 'createdAt'>> & { updatedAt: string };
+
+    const updateData: UserUpdate = {
+      ...(user.username && user.username !== existingUser.username && { username: user.username }),
+      ...(user.email && user.email !== existingUser.email && { email: user.email }),
+      ...(user.fName && user.fName !== existingUser.fName && { fName: user.fName }),
+      ...(user.lName && user.lName !== existingUser.lName && { lName: user.lName }),
+      updatedAt: new Date().toISOString(),
+    };
+    
+    if (user.password && user.password !== existingUser.password) {
+      if (!user.password.startsWith('$2')) {
+        updateData.password = await bcrypt.hash(user.password, this.SALT_ROUNDS);
+      } else {
+        updateData.password = user.password;
+      }
+    }
+
+    const updatedUser = await db.user.update({
+      where: { id: existingUser.id },
+      data: updateData,
+    });
+
+      return {
+        id: existingUser.id,
+        username: existingUser.username,
+        email: existingUser.email,
+        password: existingUser.password,
+        fName: existingUser.fName,
+        lName: existingUser.lName,
+        createdAt: existingUser.createdAt.toISOString(),
+        updatedAt: existingUser.updatedAt.toISOString()
+      };
+    }
+  }

@@ -4,6 +4,7 @@ import { createFactory } from "hono/factory";
 
 type SessionDataTypes = {
   userId: number | null;
+  userEmail: string | null;
 };
 type Env = {
   Variables: {

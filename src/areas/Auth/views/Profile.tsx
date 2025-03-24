@@ -1,5 +1,10 @@
-export function Profile() {
-  return (
+import { IUser } from "../../../shared/dtos";
+
+export function Profile({ user, error, success }: { 
+  user: IUser; 
+  error: string; 
+  success: string; 
+}) {  return (
     <section class="py-10 my-auto dark:bg-gray-900">
       <div class="lg:w-[80%] md:w-[90%] w-[96%] mx-auto flex gap-4">
         <div class="lg:w-[88%] sm:w-[88%] w-full mx-auto shadow-2xl p-4 rounded-xl h-fit self-center dark:bg-gray-800/40">
@@ -7,10 +12,10 @@ export function Profile() {
             <h1 class="lg:text-3xl md:text-2xl text-xl mb-2 dark:text-white">
               Profile
             </h1>
-            <h2 class="text-grey text-sm mb-4 dark:text-gray-400">
-              Edit Profile
-            </h2>
-            <form>
+            {error && <div class="bg-red-100 p-3">{error}</div>}
+            {success && <div class="bg-green-100 p-3">{success}</div>}
+        
+            <form action ="/auth/profile" method ="post">
               <div class="mx-auto flex justify-center w-[141px] h-[141px] bg-blue-300/20 rounded-full bg-[url('https://morgancarter.com.au/assets/images/blog/encouraging-upload/thumbnail.png')] bg-cover bg-center bg-no-repeat">
                 <div class="bg-white/90 rounded-full w-6 h-6 text-center ml-28 mt-4">
                   <input
@@ -18,7 +23,6 @@ export function Profile() {
                     name="profile"
                     id="upload_profile"
                     hidden
-                    required
                   />
 
                   <label for="upload_profile">
@@ -46,30 +50,69 @@ export function Profile() {
                   </label>
                 </div>
               </div>
-              <div class="flex flex-col lg:flex-row gap-2 justify-center w-full">
-                <div class="w-full  mb-4 mt-6">
+              
+              <div className="flex flex-col md:flex-row gap-4 mt-6 mb-4">
+                <div className="w-full">
                   <input
-                    type="text"
-                    class="mt-2 p-4 w-full border-2 rounded-lg text-gray-500 border-gray-300"
-                    placeholder="Email"
+                    type="email"
+                    id="email"
+                    name="email"
+                    className="p-4 w-full border-2 rounded-lg text-gray-500 border-gray-300"
+                    placeholder={user.email}
+                    defaultValue={user.email}
                   />
                 </div>
-                <div class="w-full  mb-4 lg:mt-6">
+                <div className="w-full">
                   <input
                     type="password"
-                    class="mt-2 p-4 w-full border-2 rounded-lg text-gray-500 border-gray-300"
-                    placeholder="Password"
+                    id="password"
+                    name="password"
+                    className="p-4 w-full border-2 rounded-lg text-gray-500 border-gray-300"
+                    placeholder="Enter new password"
                   />
                 </div>
               </div>
-
-              <div class="w-full rounded-lg bg-indigo-600 mt-4 text-white text-lg font-semibold">
+              
+              <div className="flex flex-col md:flex-row gap-4 mb-4">
+                <div className="w-full">
+                  <input
+                    type="text"
+                    id="fName"
+                    name="fName"
+                    className="p-4 w-full border-2 rounded-lg text-gray-500 border-gray-300"
+                    placeholder={user.fName}
+                    defaultValue={user.fName}
+                  />
+                </div>
+                <div className="w-full">
+                  <input
+                    type="text"
+                    id="lName"
+                    name="lName"
+                    className="p-4 w-full border-2 rounded-lg text-gray-500 border-gray-300"
+                    placeholder={user.lName}
+                    defaultValue={user.lName}
+                  />
+                </div>
+              </div>
+              
+              <div className="w-full mb-4">
+                <input
+                  type="text"
+                  id="username"
+                  name="username"
+                  className="p-4 w-full border-2 rounded-lg text-gray-500 border-gray-300"
+                  placeholder={user.username}
+                  defaultValue={user.username}
+                />
+              </div>
+              
+              <div className="w-full rounded-lg bg-indigo-600 text-white text-lg font-semibold">
                 <button
-                  disabled
                   type="submit"
-                  class="w-full p-4 hover:cursor-pointer disabled:bg-gray-300"
+                  className="w-full p-4 hover:bg-indigo-700 transition-colors"
                 >
-                  Submit
+                  Save changes
                 </button>
               </div>
             </form>

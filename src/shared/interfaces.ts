@@ -2,12 +2,13 @@ import { IPost, IUser, ILogin, PostCreate, PostDelete, postDeleteSchema, PostUpd
 
 export interface IController {
   path: string;
-  // router: Hono; // TODO: DELETE THIS (NO LONGER NECESSARY)
 }
 
 export interface IAuthService {
   createUser(user: IUser): Promise<IUser>;
   loginUser(user: ILogin): Promise<IUser>;
+  getUserById(id: number): Promise<IUser | null>;
+  updateUser(user: IUser): Promise<IUser>;
 }
 
 export interface IPostsService {

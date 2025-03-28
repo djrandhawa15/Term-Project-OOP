@@ -11,24 +11,28 @@ datasource db {
 }
 
 model User {
-  id           Int       @id @default(autoincrement())
-  username     String    @unique
+  id           Int      @id @default(autoincrement())
+  username     String   @unique
   fName        String
-  lName        String
-  email        String    @unique
+  lName        String 
+  email        String   @unique
   password     String
-  profilePhoto String?
-  createdAt    DateTime  @default(now())
-  updatedAt    DateTime  @updatedAt
+  profilePhoto String? 
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt 
   posts        Post[]
   comments     Comment[]
+  liked Like[]
+
 }
 
 model Post {
-  id       Int       @id @default(autoincrement())
-  content  String
-  user     User      @relation(fields: [userId], references: [id])
-  userId   Int
+  id      Int    @id @default(autoincrement())
+  content String
+  user    User   @relation(fields: [userId], references: [id])
+  userId  Int
+  likes Like[]
+  likesCount Int @default(0)
   comments Comment[]
 }
 
@@ -40,4 +44,13 @@ model Comment {
   user      User     @relation(fields: [userId], references: [id])
   postId    Int
   post      Post     @relation(fields: [postId], references: [id])
+}
+
+model Like {
+  post      Post     @relation(fields: [postId], references: [id], onDelete: Cascade)
+  postId    Int
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId    Int
+
+  @@id([postId, userId])
 }

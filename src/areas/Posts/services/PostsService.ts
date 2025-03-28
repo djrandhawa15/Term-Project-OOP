@@ -8,7 +8,12 @@ export class PostsService implements IPostsService {
     const posts = await db.post.findMany({
       include: { 
         user: true,
-        likes: true
+        likes: true,
+        comments: {
+          select: {
+            id: true
+          }
+        }
       }
     });
 
@@ -31,6 +36,7 @@ export class PostsService implements IPostsService {
         likes: p.likesCount,
         liked: isLiked,
         code: "",
+        commentCount: p.comments.length
       };
     });
   }
@@ -108,7 +114,12 @@ export class PostsService implements IPostsService {
   async getPostById(postId: number, currentUserId?: number): Promise<IPost | null> {
     const post = await db.post.findUnique({
       where: { id: postId },
-      include: { user: true, likes: true }
+      include: { user: true, likes: true,  comments: {
+        select: {
+          id: true
+        }
+      }
+      }
     });
 
     if (!post) {
@@ -133,6 +144,7 @@ export class PostsService implements IPostsService {
       likes: post.likesCount,
       liked: isLiked,
       code: "",
+      commentCount: post.comments.length
     };
   }
 
@@ -244,6 +256,11 @@ export class PostsService implements IPostsService {
           where: {
             userId
           }
+        },
+        comments: {
+          select: {
+            id: true
+          }
         }
       },
     });
@@ -256,6 +273,7 @@ export class PostsService implements IPostsService {
       likes: p.likesCount,
       liked: p.likes.length > 0,
       code: "",
+      commentCount: p.comments.length 
     }));
   }
 }

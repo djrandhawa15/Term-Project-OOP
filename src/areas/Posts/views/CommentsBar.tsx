@@ -25,10 +25,9 @@ export function CommentsBar({ postId }: Props) {
           &times;
         </a>
         <CommentsSection postId={postId}>
-          <CommentsBarHeader />
-          <CreateCommentForm postId={postId} />
+        <CommentsBarHeader postId={postId} />
+        <CreateCommentForm postId={postId} />
           <div id="comments-list">
-            {/* Comments will load here */}
           </div>
         </CommentsSection>
       </div>

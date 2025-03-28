@@ -28,6 +28,7 @@ export const PostSchema = z.object({
   author: z.string().optional(),
   liked: z.boolean().optional(),
   likes: z.number().optional(),
+  commentCount: z.number().optional(),
 });
 
 export const PostsSchema = z.array(PostSchema);
@@ -51,16 +52,10 @@ export type PostUpdate = z.TypeOf<typeof postUpdateSchema>;
 export type PostDelete = z.TypeOf<typeof postDeleteSchema>;
 export type PostCreate = z.TypeOf<typeof postCreateSchema>;
 
-// Infer TypeScript type from schema
 export type IUser = z.infer<typeof UserDTO>;
 export type ILogin = z.infer<typeof LoginDTO>
 export type IPost = z.infer<typeof PostSchema>;
 
-
-
-
-
-// COMMENT SCHEMA
 export const CommentSchema = z.object({
   id: z.number().optional(),
   text: z.string().min(1),

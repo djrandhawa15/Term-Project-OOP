@@ -211,6 +211,11 @@ document.addEventListener("DOMContentLoaded", () => {
           `).join('');
         }
       }
+      const commentHeader = document.getElementById("comment-header");
+      if (commentHeader) {
+        const count = data.comments.length;
+        commentHeader.textContent = `Discussion (${count} ${count === 1 ? 'Comment' : 'Comments'})`;
+      }
     } catch (error) {
       console.error("Error loading comments:", error);
     }

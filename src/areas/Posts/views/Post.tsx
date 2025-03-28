@@ -91,10 +91,10 @@ export function Post({ post }: Props) {
             
             <a
               href="#"
-              class="text-gray-500 cursor-pointer p-1.5 rounded-full hover:bg-blue-100 navBtn"
+              className="text-gray-500 cursor-pointer p-1.5 rounded-full hover:bg-blue-100 navBtn"
               data-post-id={post.id}
             >
-              3 Comments
+              {post.commentCount || 0} {post.commentCount === 1 ? 'Comment' : 'Comments'}
             </a>
           </div>
         </div>

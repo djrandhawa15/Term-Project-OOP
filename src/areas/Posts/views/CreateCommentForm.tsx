@@ -20,7 +20,7 @@ export function CreateCommentForm({ postId }: Props) {
       </div>
       <button
         type="submit"
-        class="inline-flex items-center py-2.5 px-4 text-xs font-medium text-center text-gray-900 border-0 focus:ring-0 focus:outline-none dark:text-white dark:placeholder-gray-400 dark:bg-gray-800"
+        class="text-gray-500 cursor-pointer p-1.5 rounded-full hover:bg-blue-100"
       >
         Post comment
       </button>

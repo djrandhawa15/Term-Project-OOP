@@ -1,4 +1,6 @@
 document.addEventListener("DOMContentLoaded", () => {
+  let currentPostId = null;
+
   function openNav() {
     document.getElementById("sideBar").style.width = "100%";
     document.getElementById("sideNav").style.width = "40%";
@@ -11,11 +13,40 @@ document.addEventListener("DOMContentLoaded", () => {
   
   document
     .querySelectorAll(".navBtn")
-    .forEach((b) => (b.onclick = () => openNav()));
+    .forEach((btn) => {
+      btn.onclick = async (e) => {
+        e.preventDefault();
+        e.stopPropagation(); 
+        currentPostId = btn.getAttribute("data-post-id");
+        if (currentPostId) {
+          await loadComments(currentPostId);
+          openNav();
+        } else {
+          openNav();
+        }
+      };
+    });
 
   const exitButton = document.querySelector("#Xbtn");
   if (exitButton) {
     exitButton.onclick = () => exitNav();
+  }
+
+  const sideBar = document.getElementById("sideBar");
+  const sideNav = document.getElementById("sideNav");
+  
+  if (sideBar) {
+    sideBar.addEventListener("click", (e) => {
+      if (e.target === sideBar) {
+        exitNav();
+      }
+    });
+  }
+  
+  if (sideNav) {
+    sideNav.addEventListener("click", (e) => {
+      e.stopPropagation();
+    });
   }
 
   const dropdown = document.querySelector("#dropdown");
@@ -152,5 +183,77 @@ document.addEventListener("DOMContentLoaded", () => {
         likeCountElement.classList.add('text-gray-500');
       }
     }
+  }
+
+  async function loadComments(postId) {
+    try {
+      const response = await fetch(`/posts/${postId}/comments`);
+      const data = await response.json();
+      
+      if (data.success) {
+        const commentsList = document.getElementById("comments-list");
+        if (commentsList) {
+          commentsList.innerHTML = data.comments.map(comment => `
+            <article class="p-6 mb-4 text-base bg-white rounded-lg dark:bg-gray-900">
+              <footer class="flex justify-between items-center mb-2">
+                <div class="flex items-center">
+                  <p class="inline-flex items-center mr-3 text-sm text-gray-900 dark:text-white">
+                    <img class="mr-2 w-6 h-6 rounded-full" src="https://flowbite.com/docs/images/people/profile-picture-2.jpg" alt="${comment.username}">
+                    ${comment.username}
+                  </p>
+                  <p class="text-sm text-gray-600 dark:text-gray-400">
+                    <time datetime="${comment.createdAt}">${new Date(comment.createdAt).toLocaleDateString()}</time>
+                  </p>
+                </div>
+              </footer>
+              <p class="text-gray-500 dark:text-gray-400">${comment.text}</p>
+            </article>
+          `).join('');
+        }
+      }
+    } catch (error) {
+      console.error("Error loading comments:", error);
+    }
+  }
+
+  const commentForm = document.getElementById("comment-form");
+  if (commentForm) {
+    commentForm.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      
+      if (!currentPostId) {
+        console.error("No post ID found");
+        return;
+      }
+
+      const formData = new FormData(commentForm);
+      const submitButton = commentForm.querySelector('button[type="submit"]');
+      
+      try {
+        submitButton.disabled = true;
+        submitButton.textContent = "Posting...";
+
+        console.log("Submitting comment for post ID:", currentPostId);
+
+        const response = await fetch(`/posts/${currentPostId}/comment`, {
+          method: "POST",
+          body: formData
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+          commentForm.reset();
+          await loadComments(currentPostId);
+        } else {
+          console.error("Failed to post comment:", data.message);
+        }
+      } catch (error) {
+        console.error("Error posting comment:", error);
+      } finally {
+        submitButton.disabled = false;
+        submitButton.textContent = "Post comment";
+      }
+    });
   }
 });

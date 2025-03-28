@@ -14,8 +14,8 @@ export interface IAuthService {
 export interface IPostsService {
   createPost(post: PostCreate, userId: number): Promise<IPost>;
   deletePost(postId: PostDelete, userId: number): Promise<void>;
-  getPosts(): Promise<IPost[]>;
-
+  getPosts(currentUserId?: number): Promise<IPost[]>;
   updatePost(update: PostUpdate, userId: number): Promise<IPost>
-  getPostById(postId: number): Promise<IPost | null>
+  getPostById(postId: number, currentUserId?: number): Promise<IPost | null>
+  toggleLike(postId: number, userId: number, likeValue: number): Promise<void>;
 }

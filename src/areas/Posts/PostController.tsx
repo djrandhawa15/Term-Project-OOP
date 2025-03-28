@@ -47,9 +47,60 @@ export class PostController extends BaseController implements IController {
     this.router.post(`${this.path}/update/:id`, authMiddleware, ...this.updatePost)
 
     this.router.get(`${this.path}/edit/:id`, authMiddleware, ...this.editPostPage)
+
+    this.router.post(`${this.path}/:id/like`, authMiddleware, ...this.toggleLike);
+
   }
 
-  // Update Post
+
+  private toggleLike = this.factory.createHandlers(async (c) => {
+    const id = c.req.param("id");
+    if (!id) throw new Error("Post ID missing");
+    
+    const user = c.get("user");
+    if (!user) {
+      if (c.req.header("X-Requested-With") === "XMLHttpRequest") {
+        return c.json({ 
+          success: false, 
+          error: "Authentication required" 
+        }, 401);
+      }
+      return c.redirect("/auth/login");
+    }
+    
+    const postId = parseInt(id);
+    const body = await c.req.parseBody();
+    
+    let likeValue = 1;  
+    if (body.action === "unlike") {
+      likeValue = -1; 
+    }    
+
+    try {
+      await this._postsService.toggleLike(postId, user.id, likeValue);
+      
+      const isAjax = c.req.header("X-Requested-With") === "XMLHttpRequest";
+      
+      if (isAjax) {
+        const updatedPost = await this._postsService.getPostById(postId, user.id);
+        return c.json({ 
+          success: true, 
+          post: updatedPost 
+        });
+      } else {
+        return c.redirect("/posts");
+      }
+    } catch (error) {
+      if (c.req.header("X-Requested-With") === "XMLHttpRequest") {
+        return c.json({ 
+          success: false, 
+          error: (error as Error).message 
+        });
+      }
+      throw error;
+    }
+  });
+
   private updatePost = this.factory.createHandlers(async (c) => {
     const id = c.req.param("id")
     if(!id) throw new Error("Post ID Missing")
@@ -69,7 +120,6 @@ export class PostController extends BaseController implements IController {
     return c.redirect("/posts")
   })
 
-  // Delete Post
   private deletePost = this.factory.createHandlers(async (c) => {
     const id = c.req.param("id")
     if(!id) throw new Error("Post ID missing")
@@ -87,10 +137,8 @@ export class PostController extends BaseController implements IController {
     return c.redirect("/posts");
   })
 
-  // Create Posts
   private createPosts = this.factory.createHandlers(async(c) => {
     const body = await c.req.parseBody();
-    // const validatedPost = PostSchema.parse(body)
     const user = c.get("user");
     if(!user) {
       return c.redirect("/auth/login");
@@ -111,11 +159,17 @@ export class PostController extends BaseController implements IController {
    *********************
    */
   private showPostsPage = this.factory.createHandlers(async (c) => {
-    console.log("The currently logged in User:");
     const user = c.get("user");
-    console.log(user);
-    const posts = await this._postsService.getPosts();
-    return c.render(
+    console.log(`The currently logged in User:${user}`);
+
+   let posts;
+  if (user) {
+    posts = await this._postsService.getPosts(user.id);
+  } else {
+    posts = await this._postsService.getPosts();
+  }
+  
+        return c.render(
       <Layout>
         <Header />
         <Index posts={posts} />

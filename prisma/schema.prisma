@@ -21,6 +21,7 @@ model User {
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt 
   posts        Post[]
+  comments     Comment[]
   liked Like[]
   
 }
@@ -32,6 +33,17 @@ model Post {
   userId  Int
   likes Like[]
   likesCount Int @default(0)
+  comments Comment[]
+}
+
+model Comment {
+  id        Int      @id @default(autoincrement())
+  text      String
+  createdAt DateTime @default(now())
+  userId    Int
+  user      User     @relation(fields: [userId], references: [id])
+  postId    Int
+  post      Post     @relation(fields: [postId], references: [id])
 }
 
 model Like {

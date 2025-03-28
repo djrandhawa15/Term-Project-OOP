@@ -25,7 +25,6 @@ export function Index({ posts }: Props) {
                   className="w-full border-0 text-lg resize-none placeholder-gray-400 p-2 rounded outline-none hover:bg-gray-100 transition-all duration-300 ease-in-out"
                   placeholder="What's happening?"
                   rows={3}
-                  // value={"New Post"}
                 ></textarea>
               </div>
             </div>

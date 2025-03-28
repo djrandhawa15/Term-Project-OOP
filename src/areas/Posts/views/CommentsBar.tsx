@@ -3,7 +3,11 @@ import { CommentsBarHeader } from "./CommentsBarHeader";
 import { CommentsSection } from "./CommentsSection";
 import { CreateCommentForm } from "./CreateCommentForm";
 
-export function CommentsBar() {
+type Props = {
+  postId?: number;
+};
+
+export function CommentsBar({ postId }: Props) {
   return (
     <div
       id="sideBar"
@@ -20,10 +24,12 @@ export function CommentsBar() {
         >
           &times;
         </a>
-        <CommentsSection>
+        <CommentsSection postId={postId}>
           <CommentsBarHeader />
-          <CreateCommentForm />
-          <Comment />
+          <CreateCommentForm postId={postId} />
+          <div id="comments-list">
+            {/* Comments will load here */}
+          </div>
         </CommentsSection>
       </div>
     </div>

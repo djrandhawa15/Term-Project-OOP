@@ -1,7 +1,7 @@
 import { db } from "../../../database/client";
-import { IPost, IUser, PostCreate, PostDelete, PostUpdate } from "../../../shared/dtos";
+import { IPost, IUser, PostCreate, PostDelete, PostUpdate, IComment, CommentCreate } from "../../../shared/dtos";
 import { IPostsService } from "../../../shared/interfaces";
-import { AuthService } from "@/areas/Auth/services/AuthService";
+import { PrismaClient } from '@prisma/client';
 
 export class PostsService implements IPostsService {
   async getPosts(currentUserId?: number): Promise<IPost[]> {
@@ -133,6 +133,57 @@ export class PostsService implements IPostsService {
       likes: post.likesCount,
       liked: isLiked,
       code: "",
+    };
+  }
+
+  async getCommentsByPost(postId: number): Promise<IComment[]> {
+    const comments = await db.comment.findMany({
+      where: { postId },
+      include: { user: true },
+      orderBy: { createdAt: "asc" }
+    });
+
+    return comments.map((c) => ({
+      id: c.id,
+      text: c.text,
+      createdAt: c.createdAt.toISOString(),
+      userId: c.userId,
+      username: c.user.username,
+      postId: c.postId,
+    }));
+  }
+
+  async createComment(comment: CommentCreate, userId: number, postId: number | string): Promise<IComment> {
+    const parsedPostId = typeof postId === 'string' ? parseInt(postId, 10) : postId;
+    
+    if (isNaN(parsedPostId)) {
+      throw new Error("Invalid post ID");
+    }
+    
+    const post = await db.post.findUnique({
+      where: { id: parsedPostId }
+    });
+    
+    if (!post) {
+      throw new Error("Post not found");
+    }
+    
+    const newComment = await db.comment.create({
+      data: {
+        text: comment.text,
+        userId,
+        postId: parsedPostId
+      },
+      include: { user: true }
+    });
+    
+    return {
+      id: newComment.id,
+      text: newComment.text,
+      createdAt: newComment.createdAt.toISOString(),
+      userId: newComment.userId,
+      username: newComment.user.username,
+      postId: newComment.postId,
     };
   }
 

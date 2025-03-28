@@ -1,4 +1,4 @@
-import { IPost, IUser, ILogin, PostCreate, PostDelete, postDeleteSchema, PostUpdate } from "./dtos";
+import { IPost, IUser, ILogin, PostCreate, PostDelete, postDeleteSchema, PostUpdate, IComment, CommentCreate } from "./dtos";
 
 export interface IController {
   path: string;
@@ -18,4 +18,10 @@ export interface IPostsService {
 
   updatePost(update: PostUpdate, userId: number): Promise<IPost>
   getPostById(postId: number): Promise<IPost | null>
+
+
+
+
+  getCommentsByPost(postId: number): Promise<IComment[]>
+  createComment(comment: CommentCreate, userId: number, postId: number): Promise<IComment>
 }

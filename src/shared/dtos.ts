@@ -56,3 +56,27 @@ export type PostCreate = z.TypeOf<typeof postCreateSchema>;
 export type IUser = z.infer<typeof UserDTO>;
 export type ILogin = z.infer<typeof LoginDTO>
 export type IPost = z.infer<typeof PostSchema>;
+
+
+
+
+
+// COMMENT SCHEMA
+export const CommentSchema = z.object({
+  id: z.number().optional(),
+  text: z.string().min(1),
+  createdAt: z.string().optional(),
+  userId: z.number().optional(),
+  postId: z.number().optional(),
+  username: z.string().optional(),
+})
+
+export const commentCreateSchema = z.object({
+  text: z.string().min(1),
+})
+
+export const CommentsSchema = z.array(CommentSchema);
+
+export type TComment = z.TypeOf<typeof CommentsSchema>;
+export type IComment = z.infer<typeof CommentSchema>;
+export type CommentCreate = z.infer<typeof commentCreateSchema>;

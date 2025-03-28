@@ -1,5 +1,5 @@
 import { db } from "../../../database/client";
-import { IPost, IUser, PostCreate, PostDelete, PostUpdate } from "../../../shared/dtos";
+import { IPost, IUser, PostCreate, PostDelete, PostUpdate, IComment, CommentCreate } from "../../../shared/dtos";
 import { IPostsService } from "../../../shared/interfaces";
 
 export class PostsService implements IPostsService {
@@ -109,5 +109,45 @@ export class PostsService implements IPostsService {
       liked: false,
       code: "",
     };
+  }
+
+
+
+  async getCommentsByPost(postId: number): Promise<IComment[]> {
+    const comments = await db.comment.findMany({
+      where: { postId },
+      include: { user: true },
+      orderBy: { createdAt: "asc" }
+    })
+
+    return comments.map((c: any) => ({
+      id: c.id,
+      text: c.text,
+      createdAt: c.createdAt.toISOString(),
+      userId: c.userId,
+      username: c.user.username,
+      postId: c.postId,
+    }))
+  }
+
+
+
+  async createComment(comment: CommentCreate, userId: number, postId: number): Promise<IComment> {
+    const newComment = await db.comment.create({
+      data: {
+        text: comment.text,
+        userId,
+        postId,
+      },
+      include: { user: true }
+    })
+    return {
+      id: newComment.id,
+      text: newComment.text,
+      createdAt: newComment.createdAt.toISOString(),
+      userId: newComment.userId,
+      username: newComment.user.username,
+      postId: newComment.postId,
+    }
   }
 }

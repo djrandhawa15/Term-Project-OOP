@@ -10,6 +10,7 @@ import {
   postCreateSchema,
   postUpdateSchema,
   postDeleteSchema,
+  commentCreateSchema,
 } from "../../shared/dtos";
 
 export class PostController extends BaseController implements IController {
@@ -151,14 +152,40 @@ export class PostController extends BaseController implements IController {
    *  Comment Routes  *
    *********************
    */
-  private getComments = this.factory.createHandlers((c) => {
+  private getComments = this.factory.createHandlers(async (c) => {
     // 🚀 TODO: Implement this (In Phase 2)
-    return c.json([]);
+    const id = c.req.param("id");
+
+    if(!id) return c.json({ success: false, message: "Post ID missing" })
+    const postId = parseInt(id)
+
+    try {
+      const comments = await this._postsService.getCommentsByPost(postId);
+      return c.json({ success: true, count: comments.length, comments })
+    } catch (error) {
+      console.error("Error fetching comments", error)
+      return c.json({ success: false, message: "Error fetching comments" })
+    }
   });
 
-  private createComment = this.factory.createHandlers((c) => {
+  private createComment = this.factory.createHandlers(async (c) => {
     // 🚀 TODO: Implement this (In Phase 2)
-    const createdCommented = {};
-    return c.json(createdCommented);
+
+    const id = c.req.param("id");
+    if(!id) return c.json({ success: false, message: "Post ID missing" })
+    
+    const postId = parseInt(id);
+    const body = await c.req.parseBody();
+    const commentData = commentCreateSchema.parse(body)
+    const user = c.get("user");
+
+    if(!user) return c.redirect("/auth/login")
+    try {
+      const newComment = await this._postsService.createComment(commentData, user.id, postId)
+      return c.json({ success: true, comment: newComment })
+    } catch (error) {
+      console.error("Error creating comment", error)
+      return c.json({ success: false, message: "Error creating comment" })
+    }
   });
 }

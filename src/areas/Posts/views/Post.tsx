@@ -88,6 +88,7 @@ export function Post({ post }: Props) {
             <a
               href="#"
               class="text-gray-500 cursor-pointer p-1.5 rounded-full hover:bg-blue-100 navBtn"
+              data-post-id={post.id}
             >
               3 Comments
             </a>

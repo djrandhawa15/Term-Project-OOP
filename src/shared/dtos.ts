@@ -19,8 +19,8 @@ export const LoginDTO = z.object({
 
 export const PostSchema = z.object({
   id: z.number().optional(),
-  text: z.string().min(1), // min(1) disallows empty strings
-  code: z.string().min(1).optional(), // min(1) disallows empty strings
+  text: z.string().min(1), 
+  code: z.string().min(1).optional(),
   createdAt: z.string().optional(),
   updatedAt: z.string().optional(),
   userId: z.number().optional(),
@@ -30,7 +30,6 @@ export const PostSchema = z.object({
   likes: z.number().optional(),
 });
 
-// For later purposes, we also define a schema for an array of todos
 export const PostsSchema = z.array(PostSchema);
 
 export const postUpdateSchema = z.object({

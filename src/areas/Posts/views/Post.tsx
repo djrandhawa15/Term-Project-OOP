@@ -1,16 +1,21 @@
-import { useEffect } from "react";
-import hljs from "highlight.js";
-import "highlight.js/styles/github.css"; // You can change this to a different theme
+"use client"; // Ensures this only runs in the browser (for SSR or Hono-like setups)
+
+import React from "react";
 import { TPost } from "../../../shared/dtos";
+import hljs from "highlight.js";
+import "highlight.js/styles/github.css"; // You can switch to other themes
 
 type Props = { post: TPost };
 
 export function Post({ post }: Props) {
-  useEffect(() => {
-    document.querySelectorAll("pre code").forEach((block) => {
-      hljs.highlightElement(block as HTMLElement);
-    });
-  }, [post.code]);
+  // ✅ Ensure this only runs in the browser
+  if (typeof window !== "undefined") {
+    setTimeout(() => {
+      document.querySelectorAll("pre code").forEach((block) => {
+        hljs.highlightElement(block);
+      });
+    }, 0);
+  }
 
   return (
     <div
@@ -33,12 +38,15 @@ export function Post({ post }: Props) {
             <span className="text-gray-500">·</span>
           </div>
           <p className="mt-1">{post.text}</p>
+
           {post.code && (
             <pre>
-              <code className="language-js">{post.code}</code>
+              <code className="mt-1 language-js">{post.code}</code>
             </pre>
           )}
+
           <div className="mt-3 flex gap-3 items-center">
+            {/* Like Button */}
             <button
               type="button"
               className="flex items-center space-x-1 group like-button"
@@ -51,14 +59,10 @@ export function Post({ post }: Props) {
                 }`}
               >
                 {post.liked ? (
-                  <svg
-                    className="w-5 h-5"
-                    fill="currentColor"
-                    viewBox="0 0 20 20"
-                  >
+                  <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
                     <path
                       fillRule="evenodd"
-                      d="M3.172 10.172a4 4 0 010-5.656l.707-.707a4 4 0 015.656 0l.707.707.707-.707a4 4 0 015.656 0l.707.707a4 4 0 010 5.656l-7.071 7.071a1 1 0 01-1.414 0l-7.071-7.071z"
+                      d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z"
                       clipRule="evenodd"
                     />
                   </svg>
@@ -68,17 +72,48 @@ export function Post({ post }: Props) {
                     fill="none"
                     stroke="currentColor"
                     viewBox="0 0 24 24"
-                    strokeWidth={2}
                   >
                     <path
                       strokeLinecap="round"
                       strokeLinejoin="round"
-                      d="M5 15l7-7 7 7"
+                      strokeWidth="1.5"
+                      d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"
                     />
                   </svg>
                 )}
               </div>
+              <span
+                id={`like-count-${post.id}`}
+                className={post.liked ? "text-red-500" : "text-gray-500"}
+              >
+                {post.likes}
+              </span>
             </button>
+
+            <a
+              href={`/posts/edit/${post.id}`}
+              className="text-gray-500 cursor-pointer p-1.5 rounded-full hover:bg-blue-100"
+            >
+              Edit
+            </a>
+
+            <form method="post" action={`/posts/delete/${post.id}`}>
+              <button
+                type="submit"
+                className="text-gray-500 cursor-pointer p-1.5 rounded-full hover:bg-blue-100"
+              >
+                Delete
+              </button>
+            </form>
+
+            <a
+              href="#"
+              className="text-gray-500 cursor-pointer p-1.5 rounded-full hover:bg-blue-100 navBtn"
+              data-post-id={post.id}
+            >
+              {post.commentCount || 0}{" "}
+              {post.commentCount === 1 ? "Comment" : "Comments"}
+            </a>
           </div>
         </div>
       </div>

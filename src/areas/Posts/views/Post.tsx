@@ -1,4 +1,4 @@
-"use client"; // Ensures this only runs in the browser (for SSR or Hono-like setups)
+"use client"; // Ensures this only runs in the browser (for SSR or Hono-like setup) 
 
 import React from "react";
 import { TPost } from "../../../shared/dtos";
@@ -8,7 +8,6 @@ import "highlight.js/styles/github.css"; // You can switch to other themes
 type Props = { post: TPost };
 
 export function Post({ post }: Props) {
-  // ✅ Ensure this only runs in the browser
   if (typeof window !== "undefined") {
     setTimeout(() => {
       document.querySelectorAll("pre code").forEach((block) => {

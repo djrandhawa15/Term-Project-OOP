@@ -1,6 +1,29 @@
+"use client";
+
+import React from "react";
 import { TPost } from "../../../shared/dtos";
+import { HighlightedContent } from "./HighlightedContent";
 
 type Props = { post: TPost };
+
+// Parses post.text for markdown-style code blocks (```...```) and separates them from plain text
+function parseContent(text: string) {
+  const parts = text.split(/(```[\s\S]*?```)/g);
+
+  return parts.map((part, index) => {
+    if (part.startsWith("```") && part.endsWith("```")) {
+      const code = part.slice(3, -3).trim();
+      return (
+        <pre key={index}>
+          <code className="language-js">{code}</code>
+        </pre>
+      );
+    } else {
+      return <p key={index}>{part}</p>;
+    }
+  });
+}
+
 export function Post({ post }: Props) {
   return (
     <div
@@ -17,17 +40,23 @@ export function Post({ post }: Props) {
             />
           </div>
         </div>
+
         <div className="flex-grow">
           <div className="flex items-center space-x-1">
             <span className="font-bold">{post.author}</span>
             <span className="text-gray-500">·</span>
           </div>
-          <p className="mt-1">{post.text}</p>
+
+          {/* Render parsed content with syntax highlighting */}
+          <HighlightedContent>{parseContent(post.text)}</HighlightedContent>
+
+          {/* Optionally render extra code field if it exists */}
           {post.code && (
             <pre>
               <code className="mt-1 language-js">{post.code}</code>
             </pre>
           )}
+
           <div className="mt-3 flex gap-3 items-center">
             <button
               type="button"
@@ -68,18 +97,21 @@ export function Post({ post }: Props) {
                   </svg>
                 )}
               </div>
-              <span id={`like-count-${post.id}`} className={post.liked ? "text-red-500" : "text-gray-500"}>
+              <span
+                id={`like-count-${post.id}`}
+                className={post.liked ? "text-red-500" : "text-gray-500"}
+              >
                 {post.likes}
               </span>
             </button>
-            
+
             <a
               href={`/posts/edit/${post.id}`}
               className="text-gray-500 cursor-pointer p-1.5 rounded-full hover:bg-blue-100"
             >
               Edit
             </a>
-            
+
             <form method="post" action={`/posts/delete/${post.id}`}>
               <button
                 type="submit"
@@ -88,13 +120,14 @@ export function Post({ post }: Props) {
                 Delete
               </button>
             </form>
-            
+
             <a
               href="#"
               className="text-gray-500 cursor-pointer p-1.5 rounded-full hover:bg-blue-100 navBtn"
               data-post-id={post.id}
             >
-              {post.commentCount || 0} {post.commentCount === 1 ? 'Comment' : 'Comments'}
+              {post.commentCount || 0}{" "}
+              {post.commentCount === 1 ? "Comment" : "Comments"}
             </a>
           </div>
         </div>

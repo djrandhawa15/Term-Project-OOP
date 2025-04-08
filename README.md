@@ -10,8 +10,8 @@ Robyn Downie: I worked on the following tasks:
 
 Dilraj Randhawa: I worked on the following tasks:
 
-1. 
-2. 
+1. Added Highlight
+2. Changed some css for comments
 
 I also needed to research on Youtube and Google the following things:
 

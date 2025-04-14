@@ -234,6 +234,7 @@ document.addEventListener("DOMContentLoaded", () => {
       const formData = new FormData(commentForm);
       const submitButton = commentForm.querySelector('button[type="submit"]');
       
+      
       try {
         submitButton.disabled = true;
         submitButton.textContent = "Posting...";
